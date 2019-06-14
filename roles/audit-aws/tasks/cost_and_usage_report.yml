@@ -1,0 +1,4 @@
+---
+- name: Get cost and usage report for {{DAYS}} day(s)
+  shell: modules/aws-cost-and-usage-report.py --days={{DAYS}} > private/csv/cost_and_usage_report.csv
+  delegate_to: localhost

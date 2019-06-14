@@ -1,0 +1,26 @@
+---
+- name: Gather facts about all instances
+  ec2_instance_facts:
+  register: ec2_output
+  delegate_to: localhost
+
+- name: Output EC2 Information to JSON file
+  lineinfile:
+    dest: private/json/ec2_results.json
+    line: "{{ ec2_output | to_nice_json(indent=2)}}"
+    create: yes
+    state: present
+  delegate_to: localhost
+
+- name: Output EC2 Information to CSV file
+  lineinfile:
+    dest: private/csv/ec2_results.csv
+    line: '"Image Id","Instance Id","Instance Type","Launch Time","Availability Zone","Private Ip Address","Public Ip Address","State", "Tags"'
+    create: yes
+    state: present
+    insertbefore: BOF
+  delegate_to: localhost
+
+- name: Create EC2 Report
+  shell: cat private/json/ec2_results.json| jq  -r '.instances[] | [ .image_id, .instance_id, .instance_type, .launch_time, .placement.availability_zone, .private_ip_address, .public_ip_address, .state.name, .tags.Name | tostring] | @csv' >> private/csv/ec2_results.csv
+  delegate_to: localhost

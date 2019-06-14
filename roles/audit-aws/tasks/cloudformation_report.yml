@@ -1,0 +1,13 @@
+---
+- name: Get all Cloudformation information
+  cloudformation_facts:
+  delegate_to: localhost
+  register: cloudformation_output
+
+- name: Output Cloudformation Information to JSON file
+  lineinfile:
+    dest: private/json/cloudformation_results.json
+    line: "{{ cloudformation_output | to_nice_json(indent=2)}}"
+    create: yes
+    state: present
+  delegate_to: localhost

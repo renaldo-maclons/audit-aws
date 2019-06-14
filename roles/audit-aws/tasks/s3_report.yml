@@ -1,0 +1,28 @@
+---
+# Retrieve a list of buckets
+- name: Retrieve a list of S3 buckets
+  aws_s3_bucket_facts:
+    region: eu-west-1
+  register: s3_output
+  delegate_to: localhost
+
+- name: Output S3 Information to JSON file
+  lineinfile:
+    dest: private/json/s3_results.json
+    line: "{{ s3_output | to_nice_json(indent=2)}}"
+    create: yes
+    state: present
+  delegate_to: localhost
+
+- name: Output S3 Information to CSV file
+  lineinfile:
+    dest: private/csv/s3_results.csv
+    line: '"Name","Creation Date"'
+    create: yes
+    state: present
+    insertbefore: BOF
+  delegate_to: localhost
+
+- name: Create S3 Report
+  shell: cat private/json/s3_results.json | jq  -r '.ansible_facts.buckets[] | [ .name, .creation_date | tostring] | @csv'  >> private/csv/s3_results.csv
+  delegate_to: localhost

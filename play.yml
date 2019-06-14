@@ -1,0 +1,12 @@
+---
+# Play:   playbook.yml
+# Usage:  ansible-playbook -i 'TARGET,' ./playbook.yml -e "ROLE=<role>" -e "TARGET=<n.n.n.n|host@fqdn>"
+# ansible-playbook -i 'localhost,' ./play.yml -e "ROLE=audit-s3-buckets" -e "TARGET=localhost" -e "USER=ubuntu"
+
+-   hosts:  '{{TARGET}}'
+    user:    '{{USER}}'
+    gather_facts: False
+
+
+    roles:
+    - { role: '{{ROLE}}' }

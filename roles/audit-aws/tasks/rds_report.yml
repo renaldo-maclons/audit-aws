@@ -1,0 +1,14 @@
+---
+# Get all RDS instances
+- name: Get all RDS instances
+  rds_instance_facts:
+  register: rds_results
+  delegate_to: localhost
+
+- name: Output RDS Information to CSV file
+  lineinfile:
+    dest: private/json/rds_results.json
+    line: "{{ rds_results | to_nice_json(indent=2)}}"
+    create: yes
+    state: present
+  delegate_to: localhost

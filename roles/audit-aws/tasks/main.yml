@@ -1,0 +1,29 @@
+---
+#tasks file for audit-aws
+- import_tasks: users_report.yml
+  tags: users_report
+  when: USER_REPORT == "true"
+- import_tasks: ec2_report.yml
+  tags: ec2_report
+  when: EC2_REPORT == "true"
+- import_tasks: lambda_report.yml
+  tags: lambda_report
+  when: LAMBDA_REPORT == "true"
+- import_tasks: s3_report.yml
+  tags: s3_report
+  when: S3_REPORT == "true"
+- import_tasks: rds_report.yml
+  tags: rds_report
+  when: RDS_REPORT == "true"
+- import_tasks: cloudfront_report.yml
+  tags: cloudfront_report
+  when: CLOUDFRONT_REPORT == "true"
+- import_tasks: cloudformation_report.yml
+  tags: cloudformation_report
+  when: CLOUDFORMATION_REPORT == "true"
+- import_tasks: cost_and_usage_report.yml
+  tags: cost_and_usage_report
+  when: COST_USAGE_REPORT == "true"
+- import_tasks: user_auth_report.yml
+  tags: user_auth_report
+  when: USER_AUTH_REPORT == "true"

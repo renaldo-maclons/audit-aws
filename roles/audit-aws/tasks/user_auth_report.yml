@@ -1,0 +1,42 @@
+---
+- name: Generate a report that includes details about when an IAM resource (user, group, role, or policy) was last used
+  shell: awk -F  "," ' $6 ~ /arn/ {print $6}' private/csv/userlist_results.csv | sed -e s/\"//g > private/json/arn_output.json
+  delegate_to: localhost
+  register: arn_output
+
+- name: Generate a report that includes details about when an IAM resource (user, group, role, or policy) was last used.
+  shell: aws iam generate-service-last-accessed-details --arn {{ item }} >> private/json/arn_jbid_output.json
+  with_lines: cat private/json/arn_output.json
+  delegate_to: localhost
+  register: arn_gen_report
+
+- name: Create Joblist for Auth Lookup
+  shell: awk '{print $2}' private/json/arn_jbid_output.json | sed -e s/\"//g -e '/^$/d' >> private/csv/arn_job_list.csv
+  delegate_to: localhost
+  register: arn_job_list
+
+- name: Retrieve the status of your report job and a list of AWS services that the resource (user, group, role, or managed policy) have accessed.
+  shell: aws iam get-service-last-accessed-details --job-id {{ item }} >> private/json/user_auth_report.json
+  with_lines: cat private/csv/arn_job_list.csv
+  delegate_to: localhost
+  register: user_auth_report
+
+- name: Output User Auth Information to CSV file
+  lineinfile:
+    dest: private/csv/user_auth_report.csv
+    line: '"Last Authenticated Entity","Last Authenticated","Service Name","Service Namespace","Total Authenticated Entities"'
+    create: yes
+    state: present
+    insertbefore: BOF
+  delegate_to: localhost
+
+- name: Create CSV Report
+  shell: cat private/json/user_auth_report.json |  jq  -r '.ServicesLastAccessed[] | [ .LastAuthenticatedEntity, .LastAuthenticated,.ServiceName, .ServiceNamespace, .TotalAuthenticatedEntities | tostring] | @csv' >> private/csv/user_auth_report.csv
+  delegate_to: localhost
+
+- name: Cleanup CSV Report.
+  lineinfile:
+    path: private/csv/user_auth_report.csv
+    regexp: '^"null".*'
+    state: absent
+  delegate_to: localhost

@@ -1,0 +1,22 @@
+---
+- name: List all users
+  shell: aws iam list-users | jq  -r '.Users[] | [ .UserName, .Path, .CreateDate, .UserId, .PasswordLastUsed, .Arn | tostring] | @csv'
+  register: lambda_output
+  delegate_to: localhost
+
+- name: Output EC2 Information to CSV file
+  lineinfile:
+    dest: private/csv/userlist_results.csv
+    line: '"User Name","Path","Creation Date","User Id","Password Last Used","Arn"'
+    create: yes
+    state: present
+    insertbefore: BOF
+  delegate_to: localhost
+
+- name: Output Lambda Information to CSV file
+  lineinfile:
+    dest: private/csv/userlist_results.csv
+    line: "{{ lambda_output.stdout}}"
+    create: yes
+    state: present
+  delegate_to: localhost

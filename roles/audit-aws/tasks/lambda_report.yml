@@ -1,0 +1,22 @@
+---
+- name: Retrieve all functions
+  shell: aws lambda list-functions | jq  -r '.Functions[] | [ .FunctionName, .Runtime, .Timeout, .CodeSize, .MemorySize, .LastModified, .Description | tostring] | @csv'
+  register: lambda_output
+  delegate_to: localhost
+
+- name: Output EC2 Information to CSV file
+  lineinfile:
+    dest: private/csv/lambda_results.csv
+    line: '"Function Name","Runtime","Timeout","CodeSize","Memory Size","Last Modified","Description"'
+    create: yes
+    state: present
+    insertbefore: BOF
+  delegate_to: localhost
+
+- name: Output Lambda Information to CSV file
+  lineinfile:
+    dest: private/csv/lambda_results.csv
+    line: "{{ lambda_output.stdout}}"
+    create: yes
+    state: present
+  delegate_to: localhost

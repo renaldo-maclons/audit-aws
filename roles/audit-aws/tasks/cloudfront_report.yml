@@ -1,0 +1,14 @@
+---
+- name: Get all details on Cloudfront
+  cloudfront_facts:
+    all_lists: true
+  delegate_to: localhost
+  register: cloudfront_output
+
+- name: Output Cloudfront Information to JSON file
+  lineinfile:
+    dest: private/json/cloudfront_results.json
+    line: "{{ cloudfront_output | to_nice_json(indent=2)}}"
+    create: yes
+    state: present
+  delegate_to: localhost
